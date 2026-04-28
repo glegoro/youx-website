@@ -27,8 +27,16 @@ export default function Contact() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setState("sending");
-    await new Promise(r => setTimeout(r, 1300));
-    setState("sent");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setState(res.ok ? "sent" : "idle");
+    } catch {
+      setState("idle");
+    }
   };
 
   const focusStyle = (el: HTMLElement) => {
