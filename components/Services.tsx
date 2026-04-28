@@ -20,7 +20,7 @@ function ServiceCard({ s, i }: { s: typeof SERVICES[0]; i: number }) {
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -56,6 +56,7 @@ export default function Services() {
     <section id="services" style={{
       padding: "var(--section-py) var(--container-px)",
       background: "var(--l800)",
+      position: "relative",
     }}>
       <div className="container">
         <div className="services-grid" style={{
@@ -70,7 +71,7 @@ export default function Services() {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
           >
             <p style={{
               fontSize: 11, fontWeight: 700, textTransform: "uppercase",
@@ -123,6 +124,13 @@ export default function Services() {
           </div>
         </div>
       </div>
+
+      {/* Gradient fade → About (dark) */}
+      <div aria-hidden style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, height: 100,
+        background: "linear-gradient(to bottom, transparent, #03030A)",
+        pointerEvents: "none", zIndex: 2,
+      }} />
 
       <style>{`
         @media (max-width: 768px) {

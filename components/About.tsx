@@ -19,6 +19,13 @@ export default function About() {
         pointerEvents: "none",
       }} />
 
+      {/* Gradient fade → Contact (white) */}
+      <div aria-hidden style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, height: 100,
+        background: "linear-gradient(to bottom, transparent, #FFFFFF)",
+        pointerEvents: "none", zIndex: 2,
+      }} />
+
       {/* Orb */}
       <div aria-hidden style={{
         position: "absolute", top: "20%", right: "-5%",
@@ -32,7 +39,7 @@ export default function About() {
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
           style={{ maxWidth: 640 }}
         >
           <p style={{

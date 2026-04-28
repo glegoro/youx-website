@@ -76,10 +76,10 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 48 }}
+      initial={{ opacity: 0, y: 56 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.65, delay: index * 0.14, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.85, delay: index * 0.18, ease: [0.16, 1, 0.3, 1] }}
       style={{ height: "100%" }}
     >
       <TiltCard>
@@ -220,20 +220,20 @@ export default function Products() {
       background: "var(--d800)",
       position: "relative", overflow: "hidden",
     }}>
-      {/* Background decoration */}
+      {/* Gradient fade → Services (light) */}
       <div aria-hidden style={{
-        position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)",
-        width: 800, height: 2,
-        background: "linear-gradient(90deg, transparent, var(--d-border), transparent)",
+        position: "absolute", bottom: 0, left: 0, right: 0, height: 100,
+        background: "linear-gradient(to bottom, transparent, #F6F6FC)",
+        pointerEvents: "none", zIndex: 2,
       }} />
 
       <div className="container">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
+          transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
           style={{ marginBottom: 56 }}
         >
           <p style={{

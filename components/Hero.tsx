@@ -74,7 +74,7 @@ export default function Hero() {
         transform: "translate(-50%,-50%)",
         background: "radial-gradient(circle, rgba(124,111,255,0.07) 0%, transparent 65%)",
         pointerEvents: "none",
-        transition: "left 0.5s ease, top 0.5s ease",
+        transition: "left 0.08s linear, top 0.08s linear",
       }} />
 
       {/* Content */}
@@ -84,7 +84,7 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           style={{
             display: "inline-flex", alignItems: "center", gap: 10,
             padding: "6px 16px 6px 8px", borderRadius: 100,
@@ -121,7 +121,7 @@ export default function Hero() {
               <motion.span key={w}
                 initial={{ y: "115%" }}
                 animate={{ y: "0%" }}
-                transition={{ duration: 0.75, delay: 0.15 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.9, delay: 0.2 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 style={{ display: "inline-block", marginRight: "0.28em" }}
               >{w}</motion.span>
             ))}
@@ -132,7 +132,7 @@ export default function Hero() {
             <motion.span
               initial={{ y: "115%" }}
               animate={{ y: "0%" }}
-              transition={{ duration: 0.75, delay: 0.31, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.9, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 display: "inline-block",
                 background: "linear-gradient(135deg, var(--purple-light) 0%, var(--cyan) 60%, var(--purple-light) 120%)",
@@ -153,7 +153,7 @@ export default function Hero() {
               <motion.span key={w}
                 initial={{ y: "115%" }}
                 animate={{ y: "0%" }}
-                transition={{ duration: 0.75, delay: 0.39 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.9, delay: 0.5 + i * 0.09, ease: [0.16, 1, 0.3, 1] }}
                 style={{ display: "inline-block", marginRight: "0.28em" }}
               >{w}</motion.span>
             ))}
@@ -164,7 +164,7 @@ export default function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.78 }}
+          transition={{ duration: 0.8, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
           style={{
             fontSize: "clamp(16px, 2vw, 19px)",
             color: "var(--dt2)", lineHeight: 1.72,
@@ -179,7 +179,7 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.92 }}
+          transition={{ duration: 0.7, delay: 1.15, ease: [0.16, 1, 0.3, 1] }}
           style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
         >
           {/* Primary */}
@@ -200,7 +200,7 @@ export default function Hero() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.6, duration: 0.6 }}
+        transition={{ delay: 1.9, duration: 0.7 }}
         style={{
           position: "absolute", bottom: 32, left: "50%",
           transform: "translateX(-50%)",
