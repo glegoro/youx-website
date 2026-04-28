@@ -22,17 +22,10 @@ export default function Navbar() {
 
   return (
     <>
-      {/* rainbow top line */}
+      {/* static gradient top line */}
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, height: 1, zIndex: 200,
         background: "linear-gradient(90deg, var(--purple), var(--cyan), var(--purple))",
-        backgroundSize: "200% 100%",
-        animation: "gradient-pan 5s ease infinite",
-        transformOrigin: "left",
-        animationName: "gradient-pan, top-line-in",
-        animationDuration: "5s, 0.6s",
-        animationTimingFunction: "ease, var(--expo)",
-        animationFillMode: "both, both",
       }} />
 
       <header style={{
