@@ -1,20 +1,26 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 
 const LINE1 = ["We", "build"];
 const LINE2 = ["products"];          // gradient word
 const LINE3 = ["people", "love", "to", "use"];
 
 export default function Hero() {
-  const [mouse, setMouse] = useState({ x: 0.5, y: 0.4 });
+  const rawX = useMotionValue(0.5);
+  const rawY = useMotionValue(0.4);
+  const springX = useSpring(rawX, { damping: 28, stiffness: 90 });
+  const springY = useSpring(rawY, { damping: 28, stiffness: 90 });
+  const spotLeft = useTransform(springX, v => `${v * 100}%`);
+  const spotTop  = useTransform(springY, v => `${v * 100}%`);
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    setMouse({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
-  }, []);
+    rawX.set((e.clientX - r.left) / r.width);
+    rawY.set((e.clientY - r.top)  / r.height);
+  }, [rawX, rawY]);
 
   return (
     <section
@@ -65,16 +71,16 @@ export default function Hero() {
         animation: "orb3 22s ease-in-out infinite",
       }} />
 
-      {/* Mouse follow spotlight */}
-      <div aria-hidden style={{
+      {/* Mouse follow spotlight — spring-driven, no re-renders */}
+      <motion.div aria-hidden style={{
         position: "absolute",
-        left: `${mouse.x * 100}%`,
-        top: `${mouse.y * 100}%`,
+        left: spotLeft,
+        top: spotTop,
         width: 600, height: 600,
-        transform: "translate(-50%,-50%)",
+        translateX: "-50%",
+        translateY: "-50%",
         background: "radial-gradient(circle, rgba(124,111,255,0.07) 0%, transparent 65%)",
         pointerEvents: "none",
-        transition: "left 0.08s linear, top 0.08s linear",
       }} />
 
       {/* Wave layers */}
@@ -103,34 +109,6 @@ export default function Hero() {
 
       {/* Content */}
       <div className="container" style={{ position: "relative", zIndex: 1, padding: "140px var(--container-px) 110px" }}>
-
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 10,
-            padding: "6px 16px 6px 8px", borderRadius: 100,
-            background: "rgba(124,111,255,0.1)",
-            border: "1px solid rgba(124,111,255,0.22)",
-            fontSize: 13, fontWeight: 600, color: "var(--purple-light)",
-            marginBottom: 40, letterSpacing: "0.01em",
-          }}
-        >
-          <span style={{
-            width: 22, height: 22, borderRadius: "50%",
-            background: "rgba(0,229,184,0.15)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{
-              width: 8, height: 8, borderRadius: "50%",
-              background: "var(--cyan)", display: "block",
-              animation: "dot-ping 2.2s ease infinite",
-            }} />
-          </span>
-          Dubai-based product studio & agency
-        </motion.div>
 
         {/* Headline — line 1 */}
         <h1 style={{
