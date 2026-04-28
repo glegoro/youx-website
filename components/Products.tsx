@@ -223,7 +223,7 @@ export default function Products() {
       {/* Gradient fade → Services (light) */}
       <div aria-hidden style={{
         position: "absolute", bottom: 0, left: 0, right: 0, height: 100,
-        background: "linear-gradient(to bottom, transparent, #F6F6FC)",
+        background: "linear-gradient(to bottom, transparent, var(--d800))",
         pointerEvents: "none", zIndex: 2,
       }} />
 

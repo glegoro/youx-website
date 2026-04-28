@@ -22,7 +22,7 @@ export default function About() {
       {/* Gradient fade → Contact (white) */}
       <div aria-hidden style={{
         position: "absolute", bottom: 0, left: 0, right: 0, height: 100,
-        background: "linear-gradient(to bottom, transparent, #FFFFFF)",
+        background: "linear-gradient(to bottom, transparent, var(--d900))",
         pointerEvents: "none", zIndex: 2,
       }} />
 

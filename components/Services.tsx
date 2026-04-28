@@ -26,27 +26,27 @@ function ServiceCard({ s, i }: { s: typeof SERVICES[0]; i: number }) {
       style={{
         padding: "28px",
         borderRadius: "var(--r-md)",
-        border: `1px solid ${hovered ? "rgba(124,111,255,0.35)" : "var(--l-border)"}`,
-        background: hovered ? "#FBFAFF" : "var(--l900)",
+        border: `1px solid ${hovered ? "rgba(124,111,255,0.35)" : "var(--d-border)"}`,
+        background: hovered ? "var(--d700)" : "var(--d800)",
         transition: "border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease",
-        boxShadow: hovered ? "0 4px 24px rgba(124,111,255,0.08), 0 0 0 1px rgba(124,111,255,0.1)" : "0 1px 4px rgba(0,0,0,0.04)",
+        boxShadow: hovered ? "0 4px 28px rgba(124,111,255,0.12), 0 0 0 1px rgba(124,111,255,0.08)" : "none",
         cursor: "default",
       }}
     >
       <div style={{
         width: 44, height: 44, borderRadius: "var(--r-sm)",
-        background: hovered ? "rgba(124,111,255,0.12)" : "var(--l700)",
+        background: hovered ? "rgba(124,111,255,0.15)" : "rgba(255,255,255,0.05)",
         display: "flex", alignItems: "center", justifyContent: "center",
         marginBottom: 18,
         transition: "background 0.25s ease",
       }}>
-        <Icon size={20} color={hovered ? "var(--purple)" : "var(--lt2)"} style={{ transition: "color 0.25s ease" }} />
+        <Icon size={20} color={hovered ? "var(--purple)" : "var(--dt2)"} style={{ transition: "color 0.25s ease" }} />
       </div>
       <h3 style={{
-        fontSize: 15, fontWeight: 700, color: "var(--lt)",
+        fontSize: 15, fontWeight: 700, color: "var(--dt)",
         letterSpacing: "-0.01em", marginBottom: 8,
       }}>{s.title}</h3>
-      <p style={{ fontSize: 13, color: "var(--lt2)", lineHeight: 1.65 }}>{s.description}</p>
+      <p style={{ fontSize: 13, color: "var(--dt2)", lineHeight: 1.65 }}>{s.description}</p>
     </motion.div>
   );
 }
@@ -55,7 +55,7 @@ export default function Services() {
   return (
     <section id="services" style={{
       padding: "var(--section-py) var(--container-px)",
-      background: "var(--l800)",
+      background: "var(--d800)",
       position: "relative",
     }}>
       <div className="container">
@@ -80,12 +80,12 @@ export default function Services() {
             <h2 style={{
               fontSize: "clamp(30px, 4.5vw, 50px)",
               fontWeight: 800, letterSpacing: "-0.035em",
-              color: "var(--lt)", lineHeight: 1.08, marginBottom: 20,
+              color: "var(--dt)", lineHeight: 1.08, marginBottom: 20,
             }}>
               Custom software<br/>built for your vision
             </h2>
             <p style={{
-              fontSize: 16, color: "var(--lt2)", lineHeight: 1.72, marginBottom: 36,
+              fontSize: 16, color: "var(--dt2)", lineHeight: 1.72, marginBottom: 36,
             }}>
               Beyond our own products, we partner with startups and scale-ups as a
               dedicated development team — bringing product thinking and engineering
@@ -127,8 +127,8 @@ export default function Services() {
 
       {/* Gradient fade → About (dark) */}
       <div aria-hidden style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, height: 100,
-        background: "linear-gradient(to bottom, transparent, #03030A)",
+        position: "absolute", bottom: 0, left: 0, right: 0, height: 120,
+        background: "linear-gradient(to bottom, transparent, var(--d900))",
         pointerEvents: "none", zIndex: 2,
       }} />
 

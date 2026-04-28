@@ -77,6 +77,30 @@ export default function Hero() {
         transition: "left 0.08s linear, top 0.08s linear",
       }} />
 
+      {/* Wave layers */}
+      {[
+        { h: 200, speed: 14, rev: false, color: "124,111,255", op: 0.09, cy: 100 },
+        { h: 160, speed: 23, rev: true,  color: "0,229,184",   op: 0.06, cy: 80  },
+        { h: 120, speed: 18, rev: false, color: "124,111,255", op: 0.05, cy: 60  },
+      ].map((w, i) => {
+        const d = `M0,${w.cy} C360,${w.cy - 40} 720,${w.cy + 40} 1080,${w.cy} C1260,${w.cy - 20} 1380,${w.cy + 20} 1440,${w.cy} L1440,${w.h} L0,${w.h} Z`;
+        return (
+          <div key={i} aria-hidden style={{
+            position: "absolute", bottom: 0, left: 0,
+            width: "200%", height: w.h,
+            animation: `wave-flow ${w.speed}s linear infinite${w.rev ? " reverse" : ""}`,
+            pointerEvents: "none",
+          }}>
+            {[0, 1].map(j => (
+              <svg key={j} viewBox={`0 0 1440 ${w.h}`} preserveAspectRatio="none"
+                style={{ width: "50%", height: "100%", display: "inline-block" }}>
+                <path d={d} fill={`rgba(${w.color},${w.op})`} />
+              </svg>
+            ))}
+          </div>
+        );
+      })}
+
       {/* Content */}
       <div className="container" style={{ position: "relative", zIndex: 1, padding: "140px var(--container-px) 110px" }}>
 
