@@ -2,7 +2,49 @@
 
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Send, CheckCircle2 } from "lucide-react";
+import { Send, CheckCircle2, Calendar, MessageCircle, Mail } from "lucide-react";
+
+const CALENDLY  = "https://calendly.com/negorgleb/30min";
+const WHATSAPP  = "https://wa.me/971585126604";
+
+const OPTIONS = [
+  {
+    icon: Calendar,
+    title: "Book a discovery call",
+    desc: "30-min video call — tell us about your project and we'll figure out how to help.",
+    cta: "Book now →",
+    href: CALENDLY,
+    accent: "var(--purple)",
+    glow: "rgba(124,111,255,0.18)",
+    bg: "rgba(124,111,255,0.06)",
+    border: "rgba(124,111,255,0.2)",
+    borderHover: "rgba(124,111,255,0.5)",
+  },
+  {
+    icon: Mail,
+    title: "Send a message",
+    desc: "Fill in the form below — we read every message and reply within 24 hours.",
+    cta: "See form ↓",
+    href: "#contact-form",
+    accent: "#0EA5E9",
+    glow: "rgba(14,165,233,0.18)",
+    bg: "rgba(14,165,233,0.06)",
+    border: "rgba(14,165,233,0.18)",
+    borderHover: "rgba(14,165,233,0.45)",
+  },
+  {
+    icon: MessageCircle,
+    title: "WhatsApp",
+    desc: "Fast answers, quick decisions. Message us directly for an instant reply.",
+    cta: "Message us →",
+    href: WHATSAPP,
+    accent: "#22C55E",
+    glow: "rgba(34,197,94,0.18)",
+    bg: "rgba(34,197,94,0.06)",
+    border: "rgba(34,197,94,0.18)",
+    borderHover: "rgba(34,197,94,0.45)",
+  },
+];
 
 type State = "idle" | "sending" | "sent";
 
@@ -18,8 +60,9 @@ const inputBase: React.CSSProperties = {
 };
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm]   = useState({ name: "", email: "", message: "" });
   const [state, setState] = useState<State>("idle");
+  const [hovered, setHovered] = useState<number | null>(null);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -41,11 +84,11 @@ export default function Contact() {
 
   const focusStyle = (el: HTMLElement) => {
     el.style.borderColor = "var(--purple)";
-    el.style.boxShadow = "0 0 0 3px rgba(124,111,255,0.14)";
+    el.style.boxShadow   = "0 0 0 3px rgba(124,111,255,0.14)";
   };
   const blurStyle = (el: HTMLElement) => {
     el.style.borderColor = "var(--l-border)";
-    el.style.boxShadow = "none";
+    el.style.boxShadow   = "none";
   };
 
   return (
@@ -54,33 +97,125 @@ export default function Contact() {
       background: "var(--l900)",
     }}>
       <div className="container">
+
+        {/* Header */}
         <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55 }}
+          style={{ textAlign: "center", marginBottom: 56 }}
+        >
+          <p style={{
+            fontSize: 11, fontWeight: 700, textTransform: "uppercase",
+            letterSpacing: "0.14em", color: "var(--purple)", marginBottom: 14,
+          }}>Contact</p>
+          <h2 style={{
+            fontSize: "clamp(30px, 4.5vw, 50px)",
+            fontWeight: 800, letterSpacing: "-0.035em",
+            color: "var(--lt)", lineHeight: 1.08, marginBottom: 16,
+          }}>
+            Let&apos;s build something together
+          </h2>
+          <p style={{ fontSize: 15, color: "var(--lt2)", lineHeight: 1.7, maxWidth: 440, margin: "0 auto" }}>
+            Choose how you&apos;d like to connect — we&apos;re flexible.
+          </p>
+        </motion.div>
+
+        {/* 3 option cards */}
+        <div className="contact-options" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 16,
+          marginBottom: 64,
+        }}>
+          {OPTIONS.map((opt, i) => {
+            const Icon = opt.icon;
+            const isHov = hovered === i;
+            const isScrollLink = opt.href.startsWith("#");
+
+            return (
+              <motion.a
+                key={opt.title}
+                href={opt.href}
+                target={isScrollLink ? undefined : "_blank"}
+                rel={isScrollLink ? undefined : "noopener noreferrer"}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  display: "flex", flexDirection: "column", gap: 16,
+                  padding: "28px 24px",
+                  borderRadius: "var(--r-lg)",
+                  border: `1px solid ${isHov ? opt.borderHover : opt.border}`,
+                  background: isHov ? opt.bg : "var(--l900)",
+                  boxShadow: isHov ? `0 8px 32px ${opt.glow}` : "0 1px 4px rgba(0,0,0,0.04)",
+                  transition: "border-color 0.25s ease, background 0.25s ease, box-shadow 0.3s ease, transform 0.25s ease",
+                  transform: isHov ? "translateY(-3px)" : "translateY(0)",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                }}
+              >
+                {/* Icon */}
+                <div style={{
+                  width: 44, height: 44, borderRadius: "var(--r-sm)",
+                  background: isHov ? `${opt.accent}22` : "var(--l700)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.25s ease",
+                  flexShrink: 0,
+                }}>
+                  <Icon size={20} color={isHov ? opt.accent : "var(--lt2)"} style={{ transition: "color 0.25s ease" }} />
+                </div>
+
+                {/* Text */}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: 16, fontWeight: 700, color: "var(--lt)",
+                    letterSpacing: "-0.01em", marginBottom: 8,
+                  }}>{opt.title}</h3>
+                  <p style={{ fontSize: 13, color: "var(--lt2)", lineHeight: 1.6 }}>
+                    {opt.desc}
+                  </p>
+                </div>
+
+                {/* CTA */}
+                <span style={{
+                  fontSize: 13, fontWeight: 700,
+                  color: isHov ? opt.accent : "var(--lt3)",
+                  transition: "color 0.25s ease",
+                }}>
+                  {opt.cta}
+                </span>
+              </motion.a>
+            );
+          })}
+        </div>
+
+        {/* Divider */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 16,
+          marginBottom: 48,
+        }}>
+          <div style={{ flex: 1, height: 1, background: "var(--l-border)" }} />
+          <span style={{
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: "var(--lt3)",
+          }}>or send a message</span>
+          <div style={{ flex: 1, height: 1, background: "var(--l-border)" }} />
+        </div>
+
+        {/* Form */}
+        <motion.div
+          id="contact-form"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
           style={{ maxWidth: 600, margin: "0 auto" }}
         >
-          <p style={{
-            fontSize: 11, fontWeight: 700, textTransform: "uppercase",
-            letterSpacing: "0.14em", color: "var(--purple)", marginBottom: 14,
-            textAlign: "center",
-          }}>Contact</p>
-          <h2 style={{
-            fontSize: "clamp(30px, 4.5vw, 50px)",
-            fontWeight: 800, letterSpacing: "-0.035em",
-            color: "var(--lt)", lineHeight: 1.08, marginBottom: 14,
-            textAlign: "center",
-          }}>
-            Let&apos;s build something together
-          </h2>
-          <p style={{
-            fontSize: 15, color: "var(--lt2)", lineHeight: 1.7,
-            marginBottom: 40, textAlign: "center",
-          }}>
-            Drop us a message and we&apos;ll get back to you shortly.
-          </p>
-
           {state === "sent" ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -91,8 +226,7 @@ export default function Contact() {
                 gap: 16, padding: "60px 32px",
                 borderRadius: "var(--r-lg)",
                 border: "1px solid var(--l-border)",
-                background: "var(--l800)",
-                textAlign: "center",
+                background: "var(--l800)", textAlign: "center",
               }}
             >
               <motion.div
@@ -192,6 +326,12 @@ export default function Contact() {
           )}
         </motion.div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .contact-options { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </section>
   );
 }
