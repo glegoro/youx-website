@@ -34,15 +34,8 @@ const FACES: [number, number, number][] = [
   [4,8,10],[5,9,11],[6,8,10],[7,9,11],
 ];
 
-const LETTERS = ["Y", "O", "U", "X"];
-
-// Orbital params for each letter: phase, elevation angle, orbit radius
-const LETTER_ORBITS = [
-  { phase: 0,               elev: Math.PI * 0.33, r: 1.52 },
-  { phase: Math.PI / 2,     elev: Math.PI * 0.67, r: 1.52 },
-  { phase: Math.PI,         elev: Math.PI * 0.33, r: 1.52 },
-  { phase: Math.PI * 1.5,   elev: Math.PI * 0.67, r: 1.52 },
-];
+const ORBIT_R = 1.55;       // orbit radius (icosahedron vertices are at r=1)
+const ORBIT_SPEED = 0.28;   // orbit angular speed (relative to shape rotation)
 
 function Icosahedron({ size = 720 }: { size?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -158,32 +151,38 @@ function Icosahedron({ size = 720 }: { size?: number }) {
         ctx.fill();
       });
 
-      /* ── 4. orbital letters ── */
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      /* ── 4. two "YOUX" labels on equatorial orbit ── */
+      for (let i = 0; i < 2; i++) {
+        const θ = st.t * ORBIT_SPEED + i * Math.PI;
 
-      LETTER_ORBITS.forEach((orb, i) => {
-        const θ = orb.phase + st.t * 0.38; // orbit at same rate as X-rotation
-        const pos: [number, number, number] = [
-          orb.r * Math.sin(orb.elev) * Math.cos(θ),
-          orb.r * Math.cos(orb.elev),
-          orb.r * Math.sin(orb.elev) * Math.sin(θ),
-        ];
-        const [rx, ry, rz] = rotate(pos, mat);
-        const [px, py] = project([rx, ry, rz]);
+        // Current position + a tiny step ahead for tangent
+        const pos  = (a: number): [number, number, number] => [ORBIT_R * Math.cos(a), 0, ORBIT_R * Math.sin(a)];
+        const [rx,  ry,  rz ] = rotate(pos(θ),        mat);
+        const [rx2, ry2, rz2] = rotate(pos(θ + 0.01), mat);
 
-        // Depth: rz ranges roughly -1.5 to +1.5 at this radius
-        const depth = Math.max(0, Math.min(1, (rz + 1.6) / 3.2));
-        const alpha = Math.max(0, (depth - 0.15) / 0.85) * 0.6;
-        if (alpha < 0.02) return;
+        const [px,  py ]  = project([rx,  ry,  rz ]);
+        const [px2, py2]  = project([rx2, ry2, rz2]);
 
-        const fontSize = Math.round(size * 0.025 + depth * size * 0.018);
-        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = `rgba(168,154,255,${alpha * 0.65})`;
-        ctx.fillStyle = `rgba(215,208,255,${alpha})`;
-        ctx.fillText(LETTERS[i], px, py);
-      });
+        // Depth-based alpha: positive rz = front, negative = behind shape
+        const alpha = Math.max(0, Math.min(1, (rz + 0.4) / 0.9)) * 0.72;
+        if (alpha < 0.02) continue;
+
+        const fontSize  = Math.round(size * 0.038);
+        const textAngle = Math.atan2(py2 - py, px2 - px);
+
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(textAngle);
+        ctx.textAlign    = "center";
+        ctx.textBaseline = "middle";
+        ctx.font         = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.letterSpacing = `${fontSize * 0.18}px`;
+        ctx.shadowBlur   = 10;
+        ctx.shadowColor  = `rgba(168,154,255,${alpha * 0.55})`;
+        ctx.fillStyle    = `rgba(210,204,255,${alpha})`;
+        ctx.fillText("YOUX", 0, 0);
+        ctx.restore();
+      }
 
       ctx.shadowBlur = 0;
       frame = requestAnimationFrame(draw);
