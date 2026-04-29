@@ -25,9 +25,9 @@ const EDGES: [number, number][] = [
   [8,10],[9,11],
 ];
 
-const LETTERS = ["Y", "o", "u", "X"];
+const LETTERS = ["Y", "O", "U", "X"];
 
-function Icosahedron({ size = 500 }: { size?: number }) {
+function Icosahedron({ size = 720 }: { size?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef({ t: 0, speed: 0.005, letterPhase: 0, letterIdx: 0 });
 
@@ -73,7 +73,7 @@ function Icosahedron({ size = 500 }: { size?: number }) {
         const y2 = y * cosX - z1 * sinX;
         const z2 = y * sinX + z1 * cosX;
         const fov = 3.2;
-        const s = size * 0.38;
+        const s = size * 0.44;
         return [(x1 / (z2 + fov)) * s + size / 2, (y2 / (z2 + fov)) * s + size / 2, z2];
       };
 
@@ -124,27 +124,28 @@ function Icosahedron({ size = 500 }: { size?: number }) {
         const fontSize = Math.round(size * 0.18);
 
         // outer soft halo
-        ctx.shadowBlur = 36;
-        ctx.shadowColor = `rgba(168,154,255,${letterAlpha * 0.5})`;
-        ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.shadowBlur = 24;
+        ctx.shadowColor = `rgba(168,154,255,${letterAlpha * 0.35})`;
+        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = `rgba(210,200,255,${letterAlpha * 0.18})`;
+        ctx.fillStyle = `rgba(200,190,255,${letterAlpha * 0.1})`;
         ctx.fillText(LETTERS[st.letterIdx], cx, cy);
 
-        // sharp core
-        ctx.shadowBlur = 16;
-        ctx.shadowColor = `rgba(200,190,255,${letterAlpha * 0.9})`;
-        ctx.fillStyle = `rgba(240,235,255,${letterAlpha * 0.95})`;
+        // sharp core — dimmer, more elegant
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = `rgba(180,170,255,${letterAlpha * 0.6})`;
+        ctx.fillStyle = `rgba(220,215,255,${letterAlpha * 0.58})`;
         ctx.fillText(LETTERS[st.letterIdx], cx, cy);
 
-        // subtle scan line sweeping upward
-        const scanY = cy + 60 - ((st.t * 28) % 120);
+        // scan line sweeping through letter area
+        const scanRange = fontSize * 0.7;
+        const scanY = cy + scanRange - ((st.t * 22) % (scanRange * 2));
         ctx.shadowBlur = 0;
         ctx.beginPath();
-        ctx.moveTo(cx - 44, scanY);
-        ctx.lineTo(cx + 44, scanY);
-        ctx.strokeStyle = `rgba(168,154,255,${letterAlpha * 0.18})`;
+        ctx.moveTo(cx - fontSize * 0.45, scanY);
+        ctx.lineTo(cx + fontSize * 0.45, scanY);
+        ctx.strokeStyle = `rgba(168,154,255,${letterAlpha * 0.14})`;
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -162,7 +163,7 @@ function Icosahedron({ size = 500 }: { size?: number }) {
       ref={ref}
       onClick={handleClick}
       title="Click to roll"
-      style={{ width: size, height: size, cursor: "pointer" }}
+      style={{ width: size, height: size, maxWidth: "100%", cursor: "pointer" }}
     />
   );
 }
@@ -195,8 +196,8 @@ export default function About() {
       <div className="container" style={{ position: "relative", zIndex: 1 }}>
         <div className="about-grid" style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "48px 80px",
+          gridTemplateColumns: "1fr 1.3fr",
+          gap: "48px 40px",
           alignItems: "center",
         }}>
 
@@ -250,7 +251,7 @@ export default function About() {
               filter: "blur(48px)",
               pointerEvents: "none",
             }} />
-            <Icosahedron size={500} />
+            <Icosahedron size={720} />
           </motion.div>
 
         </div>
