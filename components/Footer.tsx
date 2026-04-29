@@ -47,7 +47,7 @@ export default function Footer() {
               backgroundClip: "text", marginBottom: 12,
             }}>YouX</div>
             <p style={{ fontSize: 13, color: "var(--dt3)", lineHeight: 1.65, maxWidth: 260 }}>
-              Dubai-based product studio & digital agency. We build software that matters.
+              Product studio & digital agency. We build software that matters.
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export default function Footer() {
             © {year} YouX. All rights reserved.
           </p>
           <p style={{ fontSize: 12, color: "var(--dt3)" }}>
-            Dubai, United Arab Emirates
+            United Arab Emirates
           </p>
         </div>
       </div>

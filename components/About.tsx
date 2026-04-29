@@ -25,8 +25,17 @@ const EDGES: [number, number][] = [
   [8,10],[9,11],
 ];
 
+// Letters assigned to 4 spread-out vertices
+const LETTERS = ["Y", "o", "u", "X"];
+const LETTER_VI = [0, 3, 7, 10];
+
 function Icosahedron({ size = 340 }: { size?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const stateRef = useRef({ t: 0, speed: 0.005 });
+
+  const handleClick = () => {
+    stateRef.current.speed = 0.14; // D20 roll — fast spin, decays back
+  };
 
   useEffect(() => {
     const canvas = ref.current;
@@ -40,11 +49,15 @@ function Icosahedron({ size = 340 }: { size?: number }) {
     ctx.scale(dpr, dpr);
 
     let frame: number;
-    let t = 0;
+    const st = stateRef.current;
 
     const draw = () => {
+      // Decelerate toward base speed
+      if (st.speed > 0.005) st.speed = Math.max(0.005, st.speed * 0.965);
+      st.t += st.speed;
+      const t = st.t;
+
       ctx.clearRect(0, 0, size, size);
-      t += 0.005;
 
       const ry = t;
       const rx = t * 0.38;
@@ -63,7 +76,7 @@ function Icosahedron({ size = 340 }: { size?: number }) {
 
       const pts = VERTS.map(project);
 
-      /* edges */
+      /* ── edges ── */
       EDGES.forEach(([a, b]) => {
         const [ax, ay, az] = pts[a];
         const [bx, by, bz] = pts[b];
@@ -84,7 +97,7 @@ function Icosahedron({ size = 340 }: { size?: number }) {
         ctx.stroke();
       });
 
-      /* vertices */
+      /* ── vertices ── */
       ctx.shadowBlur = 10;
       pts.forEach(([px, py, pz]) => {
         const depth = Math.max(0, Math.min(1, (pz + 1) / 2));
@@ -96,6 +109,25 @@ function Icosahedron({ size = 340 }: { size?: number }) {
         ctx.fill();
       });
 
+      /* ── YouX letters at 4 vertices ── */
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      LETTER_VI.forEach((vi, i) => {
+        const [px, py, pz] = pts[vi];
+        const depth = Math.max(0, Math.min(1, (pz + 1) / 2));
+        // Only visible when facing camera (depth > 0.35)
+        const alpha = Math.max(0, (depth - 0.35) / 0.65);
+        if (alpha <= 0.02) return;
+
+        const fontSize = Math.round(10 + depth * 18);
+        ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = `rgba(168,154,255,${alpha * 0.7})`;
+        ctx.fillStyle = `rgba(255,255,255,${alpha * 0.93})`;
+        ctx.fillText(LETTERS[i], px, py);
+      });
+
       ctx.shadowBlur = 0;
       frame = requestAnimationFrame(draw);
     };
@@ -104,7 +136,14 @@ function Icosahedron({ size = 340 }: { size?: number }) {
     return () => cancelAnimationFrame(frame);
   }, [size]);
 
-  return <canvas ref={ref} style={{ width: size, height: size }} />;
+  return (
+    <canvas
+      ref={ref}
+      onClick={handleClick}
+      title="Click to roll"
+      style={{ width: size, height: size, cursor: "pointer" }}
+    />
+  );
 }
 
 /* ── Section ─────────────────────────────────────────────────── */
@@ -161,7 +200,7 @@ export default function About() {
             </h2>
 
             <p style={{ fontSize: 16, color: "var(--dt2)", lineHeight: 1.78, marginBottom: 20 }}>
-              YouX is an IT company based in Dubai. We believe the best agencies are
+              YouX is a studio run by builders. We believe the best agencies are
               built by people who also create their own products — because that&apos;s the
               only way to truly understand what it takes to ship software people depend on.
             </p>
@@ -173,7 +212,7 @@ export default function About() {
             </p>
           </motion.div>
 
-          {/* Right — icosahedron */}
+          {/* Right — icosahedron (D20) */}
           <motion.div
             className="about-visual"
             initial={{ opacity: 0, scale: 0.88 }}

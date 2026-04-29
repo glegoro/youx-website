@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "YouX — Products & Digital Agency",
   description:
-    "YouX is a Dubai-based IT company building SaaS products and delivering custom software for ambitious teams.",
+    "YouX is a product studio that ships real software — SaaS platforms and custom solutions for ambitious teams.",
   openGraph: {
     title: "YouX — Products & Digital Agency",
     description:
-      "Dubai-based product studio and digital agency. We build University Engage, Reach, and custom software.",
+      "Product studio and digital agency. We build University Engage, Reach, and custom software.",
     url: "https://youx.info",
     siteName: "YouX",
     locale: "en_US",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "YouX — Products & Digital Agency",
-    description: "Dubai-based product studio and digital agency.",
+    description: "Product studio and digital agency. We ship real software.",
   },
   metadataBase: new URL("https://youx.info"),
 };

@@ -173,8 +173,8 @@ export default function Hero() {
             maxWidth: 510, marginBottom: 52,
           }}
         >
-          YouX is a Dubai-based IT company. We ship our own SaaS products
-          and partner with ambitious teams to build exceptional digital experiences.
+          We build products we&apos;re proud to ship, then partner with
+          ambitious teams to create exceptional digital experiences.
         </motion.p>
 
         {/* CTAs */}
