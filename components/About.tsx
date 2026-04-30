@@ -3,45 +3,19 @@
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 
-/* ── Icosahedron geometry ────────────────────────────────────── */
-const φ = (1 + Math.sqrt(5)) / 2;
-const MAG = Math.sqrt(1 + φ * φ);
+/* ── Globe (sphere wireframe) ────────────────────────────────── */
+const LATS    = [-62, -36, 0, 36, 62].map(d => d * Math.PI / 180);
+const LON_N   = 12;
+const ARC_N   = 64;
 
-const VERTS: [number, number, number][] = [
-  [0, 1, φ], [0, -1, φ], [0, 1, -φ], [0, -1, -φ],
-  [1, φ, 0], [-1, φ, 0], [1, -φ, 0], [-1, -φ, 0],
-  [φ, 0, 1], [-φ, 0, 1], [φ, 0, -1], [-φ, 0, -1],
-].map(([x, y, z]) => [x / MAG, y / MAG, z / MAG]) as [number, number, number][];
+const N_LABELS  = 4;
+const ORBIT_R   = 1.58;
+const ORBIT_SPD = 0.19;   // labels orbit speed; sign = opposite to sphere
 
-const EDGES: [number, number][] = [
-  [0,1],[0,4],[0,5],[0,8],[0,9],
-  [1,6],[1,7],[1,8],[1,9],
-  [2,3],[2,4],[2,5],[2,10],[2,11],
-  [3,6],[3,7],[3,10],[3,11],
-  [4,5],[4,8],[4,10],
-  [5,9],[5,11],
-  [6,7],[6,8],[6,10],
-  [7,9],[7,11],
-  [8,10],[9,11],
-];
-
-// All 20 triangular faces of the icosahedron
-const FACES: [number, number, number][] = [
-  [0,1,8],[0,1,9],[0,4,5],[0,4,8],[0,5,9],
-  [1,6,7],[1,6,8],[1,7,9],
-  [2,3,10],[2,3,11],[2,4,5],[2,4,10],[2,5,11],
-  [3,6,7],[3,6,10],[3,7,11],
-  [4,8,10],[5,9,11],[6,8,10],[7,9,11],
-];
-
-const ORBIT_R = 1.55;       // orbit radius (icosahedron vertices are at r=1)
-const ORBIT_SPEED = 0.28;   // orbit angular speed (relative to shape rotation)
-
-function Icosahedron({ size = 720 }: { size?: number }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const stateRef = useRef({ t: 0, speed: 0.003 });
-
-  const handleClick = () => { stateRef.current.speed = 0.12; };
+function Globe({ size = 720 }: { size?: number }) {
+  const ref      = useRef<HTMLCanvasElement>(null);
+  const stateRef = useRef({ t: 0, speed: 0.008 });
+  const onClick  = () => { stateRef.current.speed = 0.16; };
 
   useEffect(() => {
     const canvas = ref.current;
@@ -57,134 +31,124 @@ function Icosahedron({ size = 720 }: { size?: number }) {
     let frame: number;
     const st = stateRef.current;
 
-    /* ── rotation + projection helpers ── */
-    const getMatrices = (t: number) => {
-      const ry = t, rx = t * 0.38;
-      return {
-        cosY: Math.cos(ry), sinY: Math.sin(ry),
-        cosX: Math.cos(rx), sinX: Math.sin(rx),
-      };
+    /* ── only Y-axis rotation (spinning-top style) ── */
+    const rotY = ([x, y, z]: [number, number, number], t: number): [number, number, number] => {
+      const c = Math.cos(t), s = Math.sin(t);
+      return [x * c - z * s, y, x * s + z * c];
     };
 
-    const rotate = (
-      [x, y, z]: [number, number, number],
-      { cosY, sinY, cosX, sinX }: ReturnType<typeof getMatrices>
-    ): [number, number, number] => {
-      const x1 = x * cosY - z * sinY;
-      const z1 = x * sinY + z * cosY;
-      const y2 = y * cosX - z1 * sinX;
-      const z2 = y * sinX + z1 * cosX;
-      return [x1, y2, z2];
-    };
-
-    const project = ([x, y, z]: [number, number, number]): [number, number, number] => {
-      const fov = 3.2, s = size * 0.44;
-      return [(x / (z + fov)) * s + size / 2, (y / (z + fov)) * s + size / 2, z];
+    const proj = ([x, y, z]: [number, number, number]): [number, number, number] => {
+      const fov = 3.2, sc = size * 0.42;
+      return [(x / (z + fov)) * sc + size / 2, (y / (z + fov)) * sc + size / 2, z];
     };
 
     const draw = () => {
-      if (st.speed > 0.003) st.speed = Math.max(0.003, st.speed * 0.965);
+      if (st.speed > 0.008) st.speed = Math.max(0.008, st.speed * 0.97);
       st.t += st.speed;
-
       ctx.clearRect(0, 0, size, size);
+      ctx.shadowBlur = 0;
 
-      const mat = getMatrices(st.t);
-      const rotated3D = VERTS.map(v => rotate(v, mat));
-      const pts = rotated3D.map(project);
+      /* ── 1. Sphere wireframe ── */
+      ctx.lineWidth = 0.85;
 
-      /* ── face normal helper ── */
-      const faceNormalZ = (a: number, b: number, c: number) => {
-        const [ax, ay, az] = rotated3D[a];
-        const [bx, by, bz] = rotated3D[b];
-        const [cx, cy, cz] = rotated3D[c];
-        const ux = bx-ax, uy = by-ay, uz = bz-az;
-        const vx = cx-ax, vy = cy-ay, vz = cz-az;
-        // z component of cross product + magnitude
-        const nz = ux*vy - uy*vx;
-        const mag = Math.sqrt((uy*uz-uz*vy)**2 + (uz*vx-ux*vz)**2 + nz**2) || 1;
-        return nz / mag;
-      };
+      // Latitude rings
+      for (const phi of LATS) {
+        const r  = Math.cos(phi);
+        const yc = Math.sin(phi);
+        const eq = phi === 0;
 
-      /* ── 1. faces (painter's algo, back → front) ── */
-      const facesDepth = FACES.map(([a, b, c]) => ({
-        abc: [a, b, c] as [number, number, number],
-        z: (rotated3D[a][2] + rotated3D[b][2] + rotated3D[c][2]) / 3,
-      })).sort((a, b) => a.z - b.z);
+        for (let s = 0; s < ARC_N; s++) {
+          const a1 = (s / ARC_N) * 2 * Math.PI;
+          const a2 = ((s + 1) / ARC_N) * 2 * Math.PI;
+          const v1 = rotY([r * Math.cos(a1), yc, r * Math.sin(a1)], st.t);
+          const v2 = rotY([r * Math.cos(a2), yc, r * Math.sin(a2)], st.t);
+          const [x1, y1] = proj(v1);
+          const [x2, y2] = proj(v2);
+          const depth = Math.max(0, Math.min(1, ((v1[2] + v2[2]) / 2 + 1) / 2));
+          const alpha = (eq ? 0.10 : 0.035) + depth * (eq ? 0.34 : 0.22);
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `rgba(168,154,255,${alpha})`;
+          ctx.stroke();
+        }
+      }
 
-      facesDepth.forEach(({ abc: [a, b, c] }) => {
-        const nz = faceNormalZ(a, b, c);
-        if (nz <= 0) return; // back-face culled
-        const [ax, ay] = pts[a], [bx, by] = pts[b], [cx, cy] = pts[c];
-        ctx.beginPath();
-        ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.lineTo(cx, cy);
-        ctx.closePath();
-        // Front faces: soft purple fill scaled by light angle
-        ctx.fillStyle = `rgba(124,111,255,${nz * 0.055})`;
-        ctx.fill();
+      // Longitude meridians
+      for (let li = 0; li < LON_N; li++) {
+        const lon = (li / LON_N) * 2 * Math.PI;
+
+        for (let s = 0; s < ARC_N; s++) {
+          const p1 = (s / ARC_N) * Math.PI - Math.PI / 2;
+          const p2 = ((s + 1) / ARC_N) * Math.PI - Math.PI / 2;
+          const v1 = rotY([Math.cos(p1) * Math.cos(lon), Math.sin(p1), Math.cos(p1) * Math.sin(lon)], st.t);
+          const v2 = rotY([Math.cos(p2) * Math.cos(lon), Math.sin(p2), Math.cos(p2) * Math.sin(lon)], st.t);
+          const [x1, y1] = proj(v1);
+          const [x2, y2] = proj(v2);
+          const depth = Math.max(0, Math.min(1, ((v1[2] + v2[2]) / 2 + 1) / 2));
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `rgba(168,154,255,${0.03 + depth * 0.20})`;
+          ctx.stroke();
+        }
+      }
+
+      /* ── 2. YOUX orbit (opposite direction) ── */
+      const fontSize = Math.round(size * 0.037);
+
+      type Label = { px: number; py: number; alpha: number; angle: number };
+
+      const labels: Label[] = Array.from({ length: N_LABELS }, (_, i) => {
+        const θ   = -st.t * ORBIT_SPD + (i / N_LABELS) * 2 * Math.PI;
+        const x3  = ORBIT_R * Math.cos(θ);
+        const z3  = ORBIT_R * Math.sin(θ);
+
+        const [px,  py ] = proj([x3, 0, z3]);
+        const [px2, py2] = proj([ORBIT_R * Math.cos(θ + 0.01), 0, ORBIT_R * Math.sin(θ + 0.01)]);
+
+        const depth = Math.max(0, Math.min(1, (z3 + ORBIT_R) / (2 * ORBIT_R)));
+        const alpha = Math.max(0, depth - 0.04) * 0.92;
+
+        // Tangent angle — flip if it would make text upside-down
+        let angle = Math.atan2(py2 - py, px2 - px);
+        if (angle > Math.PI / 2 || angle < -Math.PI / 2) angle += Math.PI;
+
+        return { px, py, alpha, angle };
       });
 
-      /* ── 2. edges ── */
-      EDGES.forEach(([a, b]) => {
-        const [ax, ay, az] = pts[a], [bx, by, bz] = pts[b];
-        const depth = Math.max(0, Math.min(1, ((az + bz) / 2 + 1) / 2));
-        const alpha = 0.06 + depth * 0.58;
-        const grad = ctx.createLinearGradient(ax, ay, bx, by);
-        grad.addColorStop(0, `rgba(168,154,255,${alpha})`);
-        grad.addColorStop(1, `rgba(0,229,184,${alpha * 0.45})`);
-        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1;
-        ctx.shadowColor = `rgba(124,111,255,${alpha * 0.3})`;
-        ctx.shadowBlur = 2;
+      // Straight chord lines between consecutive labels (with text clearance gap)
+      const GAP = fontSize * 2.6;
+      ctx.lineWidth = 0.85;
+      for (let i = 0; i < N_LABELS; i++) {
+        const a = labels[i];
+        const b = labels[(i + 1) % N_LABELS];
+        const dx = b.px - a.px, dy = b.py - a.py;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 4) continue;
+        const ux = dx / dist, uy = dy / dist;
+        const gap = Math.min(GAP, dist * 0.38);
+        ctx.beginPath();
+        ctx.moveTo(a.px + ux * gap, a.py + uy * gap);
+        ctx.lineTo(b.px - ux * gap, b.py - uy * gap);
+        ctx.strokeStyle = `rgba(168,154,255,${Math.max(0.06, (a.alpha + b.alpha) / 2 * 0.42)})`;
         ctx.stroke();
-      });
+      }
 
-      /* ── 3. vertices ── */
-      ctx.shadowBlur = 6;
-      pts.forEach(([px, py, pz]) => {
-        const depth = Math.max(0, Math.min(1, (pz + 1) / 2));
-        const alpha = 0.12 + depth * 0.78;
-        ctx.beginPath();
-        ctx.arc(px, py, 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(168,154,255,${alpha})`;
-        ctx.shadowColor = `rgba(168,154,255,${alpha * 0.7})`;
-        ctx.fill();
-      });
-
-      /* ── 4. two "YOUX" labels on equatorial orbit ── */
-      for (let i = 0; i < 2; i++) {
-        const θ = st.t * ORBIT_SPEED + i * Math.PI;
-
-        // Current position + a tiny step ahead for tangent
-        const pos  = (a: number): [number, number, number] => [ORBIT_R * Math.cos(a), 0, ORBIT_R * Math.sin(a)];
-        const [rx,  ry,  rz ] = rotate(pos(θ),        mat);
-        const [rx2, ry2, rz2] = rotate(pos(θ + 0.01), mat);
-
-        const [px,  py ]  = project([rx,  ry,  rz ]);
-        const [px2, py2]  = project([rx2, ry2, rz2]);
-
-        // Depth-based alpha: positive rz = front, negative = behind shape
-        const alpha = Math.max(0, Math.min(1, (rz + 0.4) / 0.9)) * 0.72;
+      // Draw labels
+      for (const { px, py, alpha, angle } of labels) {
         if (alpha < 0.02) continue;
-
-        const fontSize  = Math.round(size * 0.038);
-        const textAngle = Math.atan2(py2 - py, px2 - px);
-
         ctx.save();
         ctx.translate(px, py);
-        ctx.rotate(textAngle);
+        ctx.rotate(angle);
+        ctx.scale(1.48, 1);               // horizontal stretch to match logo feel
         ctx.textAlign    = "center";
         ctx.textBaseline = "middle";
-        ctx.font         = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
-        ctx.letterSpacing = `${fontSize * 0.18}px`;
-        ctx.shadowBlur   = 10;
+        ctx.font         = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.letterSpacing = `${fontSize * 0.22}px`;
+        ctx.shadowBlur   = 14;
         ctx.shadowColor  = `rgba(168,154,255,${alpha * 0.55})`;
         ctx.fillStyle    = `rgba(210,204,255,${alpha})`;
-        ctx.fillText("YOUX", 0, 0);
+        ctx.fillText("YouX", 0, 0);
         ctx.restore();
       }
 
-      ctx.shadowBlur = 0;
       frame = requestAnimationFrame(draw);
     };
 
@@ -195,8 +159,8 @@ function Icosahedron({ size = 720 }: { size?: number }) {
   return (
     <canvas
       ref={ref}
-      onClick={handleClick}
-      title="Click to roll"
+      onClick={onClick}
+      title="Click to spin"
       style={{ width: size, height: size, maxWidth: "100%", cursor: "pointer" }}
     />
   );
@@ -264,7 +228,7 @@ export default function About() {
             </p>
           </motion.div>
 
-          {/* Right — icosahedron */}
+          {/* Right — globe */}
           <motion.div
             className="about-visual"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -280,7 +244,7 @@ export default function About() {
               filter: "blur(60px)",
               pointerEvents: "none",
             }} />
-            <Icosahedron size={720} />
+            <Globe size={720} />
           </motion.div>
         </div>
       </div>
