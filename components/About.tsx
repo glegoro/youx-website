@@ -71,7 +71,7 @@ export default function About() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-          style={{ maxWidth: 640, marginBottom: 64 }}
+          style={{ maxWidth: 640, marginBottom: 64, marginLeft: "auto", marginRight: "auto", textAlign: "center" }}
         >
           <p style={{
             fontSize: 11, fontWeight: 700, textTransform: "uppercase",
